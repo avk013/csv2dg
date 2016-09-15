@@ -48,48 +48,17 @@ namespace csv2dg
                 if (!String.IsNullOrEmpty(tab0[i]))
                 {
                     tab0Values = tab0[i].Split(';');
-
                     //создаём новую строку
                     dr = dt.NewRow();
                     for(int j=0;j<8;j++)
                     {string valp= tab0Values[j];
-                        //valp = valp.Replace("  ", " ");
-                        dr[j] = Regex.Replace(valp, " {2,}", " ");
-                        //dr[j] = tab0Values[j];                    
-                    }
-                    //dr[1] = tab0Values[1];
-                    //dr[2] = tab0Values[2];
+                        dr[j] = Regex.Replace(valp, " {2,}", " ");}
                     dt.Rows.Add(dr);
                 }
             }
 
             dataGridView1.DataSource = dt;
-                    /* try
-                     {
-
-                         //  using (StreamReader sr = new StreamReader(path))
-                         //{
-                         //Console.WriteLine(sr.ReadToEnd());
-                         //}
-
-
-                         //"******считываем построчно********"
-                             using (StreamReader sr = new StreamReader(path, System.Text.Encoding.Default))
-                         {
-                             string line;
-                             while ((line = sr.ReadLine()) != null)
-                             {
-                                 line=Regex.Replace(line, @"\s+", " ");
-                                 textBox1.Text += line+System.Environment.NewLine ;
-                                 //Console.WriteLine(line);
-                             }
-                         }
-
-                     }
-                     catch 
-                     {                
-                     }*/
-
+  
                 }
 
     }
