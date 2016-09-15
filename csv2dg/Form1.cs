@@ -40,6 +40,7 @@ namespace csv2dg
             //}
             dt.Columns.AddRange(new DataColumn[] {a0,a1,a2,a3,a4,a5,a6,a7,a8,a9,a10});
             string path = @"G:\project\excell_rozklad\rozklad.csv";
+            //string path = @"rozklad.csv";
             string[] tab0 = File.ReadAllLines(path, Encoding.Default);
             string[] tab0Values = null;
             DataRow dr = null;
@@ -51,15 +52,29 @@ namespace csv2dg
                     //создаём новую строку
                     dr = dt.NewRow();
                     for(int j=0;j<8;j++)
-                    {string valp= tab0Values[j];
+                    {string valp= tab0Values[j].ToUpper();
                         dr[j] = Regex.Replace(valp, " {2,}", " ");}
                     dt.Rows.Add(dr);
                 }
             }
 
             dataGridView1.DataSource = dt;
-  
+            //пытаемся почистить
+            for (int ii = 0; ii < dt.Columns.Count; ii++)
+                for (int j = 0; j < dt.Rows.Count; j++)
+                {// if (Regex.Replace(dt.Rows[j][ii].ToString(), "{1,}", " ") == "Розклад") dt.Rows[j][ii] = ""; }
+            if (dt.Rows[j][ii].ToString().Replace(" ", string.Empty).ToUpper().Contains("занятьфакульт".ToUpper())||dt.Rows[j][ii].ToString().Replace(" ", string.Empty).ToUpper().Contains("деканфак".ToUpper())||dt.Rows[j][ii].ToString().Replace(" ", string.Empty).ToUpper() == "Розклад".ToUpper())
+                        //dt.Rows[j][ii] = "";
+                    //if (dt.Rows[j][ii].ToString().Replace(" ", string.Empty).ToUpper().Contains("занятьфакульт".ToUpper())) dt.Rows[j][ii] = "";
+                    //if (dt.Rows[j][ii].ToString().Replace(" ", string.Empty).ToUpper().Contains("деканфак".ToUpper()))
+                    { dt.Rows[j][ii] = ""; 
+                    
+                        dt.Rows.RemoveAt(j);
+                        j--;
+                    }
                 }
+    }
+       // dataGridView2.DataSource = dt;
 
     }
 }
