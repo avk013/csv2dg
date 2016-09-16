@@ -104,6 +104,7 @@ namespace csv2dg
                 "61 ГРУПА", "62 ГРУПА", "63 ГРУПА", "64 ГРУПА", "65 ГРУПА",
                 "71 ГРУПА", "72 ГРУПА", "73 ГРУПА", "74 ГРУПА", "75 ГРУПА",
                 "17 ГРУПА", "18 ГРУПА", "19 ГРУПА", "16 ГРУПА"};
+            string[] razdel_v = { "ДОЦ.","ВИКЛ."};
          //   string[] stolb1bad = { "ДНІ", "ПАРИ"};
             //ищем ячеки с группой
             int stroka=0;
@@ -128,9 +129,18 @@ namespace csv2dg
                                 dr1 = dt1.NewRow();
 
                                 dr1[0] =group ;
-                                    dr1[1] = dt.Rows[strk][0].ToString();// dat
-                                    dr1[2] = dt.Rows[strk][1].ToString(); ; //nom
-                                    dr1[3] = dt.Rows[strk][ii].ToString(); //prdm
+                                    dr1[1] = dt.Rows[strk][0].ToString().Replace(" ", string.Empty).ToUpper();// dat
+                                    dr1[2] = dt.Rows[strk][1].ToString().Replace(" ", string.Empty).ToUpper();  //nom
+                                foreach (string razdelitel in razdel_v)
+                                {string d= dt.Rows[strk][ii].ToString().Replace(" ", string.Empty).ToUpper();
+                                    int a = d.IndexOf(razdelitel,0);
+                                    if (a > 0)
+                                    {
+                                        dr1[3] = d.Substring(0, a);
+                                        dr1[4] = d.Substring(a,d.Length-a);
+                                    }
+                                }
+                                    // dr1[3] = dt.Rows[strk][ii].ToString().Replace(" ", string.Empty).ToUpper(); //prdm
 
                                 dt1.Rows.Add(dr1);
 
@@ -140,17 +150,22 @@ namespace csv2dg
                              //   }//break;
                             }
                         }
-
-
-            
-            //DataRow dr1 = null;
-            dr1 = dt1.NewRow();
-            
-                dr1[0] = "22";
-            
-            dt1.Rows.Add(dr1);
-            //DataColumn a1 = new DataColumn(i++.ToString(), typeof(String));
             dataGridView2.DataSource = dt1;
+            //////
+            StringBuilder sb = new StringBuilder();
+
+            IEnumerable<string> columnNames = dt1.Columns.Cast<DataColumn>().
+                                              Select(column => column.ColumnName);
+           // sb.AppendLine(string.Join(",", columnNames));
+
+            foreach (DataRow row in dt1.Rows)
+            {
+                IEnumerable<string> fields = row.ItemArray.Select(field => field.ToString());
+                sb.AppendLine(string.Join(";", fields));
+            }
+            textBox1.Text = sb.ToString();
+            File.WriteAllText("test.csv", sb.ToString());
+            //////
         }
 
        
