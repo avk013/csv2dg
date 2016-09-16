@@ -60,21 +60,100 @@ namespace csv2dg
 
             dataGridView1.DataSource = dt;
             //пытаемся почистить
-            for (int ii = 0; ii < dt.Columns.Count; ii++)
-                for (int j = 0; j < dt.Rows.Count; j++)
-                {// if (Regex.Replace(dt.Rows[j][ii].ToString(), "{1,}", " ") == "Розклад") dt.Rows[j][ii] = ""; }
-            if (dt.Rows[j][ii].ToString().Replace(" ", string.Empty).ToUpper().Contains("занятьфакульт".ToUpper())||dt.Rows[j][ii].ToString().Replace(" ", string.Empty).ToUpper().Contains("деканфак".ToUpper())||dt.Rows[j][ii].ToString().Replace(" ", string.Empty).ToUpper() == "Розклад".ToUpper())
-                        //dt.Rows[j][ii] = "";
-                    //if (dt.Rows[j][ii].ToString().Replace(" ", string.Empty).ToUpper().Contains("занятьфакульт".ToUpper())) dt.Rows[j][ii] = "";
-                    //if (dt.Rows[j][ii].ToString().Replace(" ", string.Empty).ToUpper().Contains("деканфак".ToUpper()))
-                    { dt.Rows[j][ii] = ""; 
-                    
-                        dt.Rows.RemoveAt(j);
-                        j--;
-                    }
+            string[] badwords = {"розклад", "деканфак", "занятьфак" };
+            string[] wastewords = { "ДНІ", "ПАРИ", "понеділок", "вівторок", "середа", "четвер", "п'ятниця", "субота", "неділя", "П’ЯТНИЦЯ" };
+            // удаляем строки с плохими словами
+            for (int k = 0; k < badwords.Length; k++)
+                for (int ii = 0; ii < dt.Columns.Count; ii++)
+                for (int j = 0; j < dt.Rows.Count; j++)   
+                {
+                 if (dt.Rows[j][ii].ToString().Replace(" ", string.Empty).ToUpper().Contains(badwords[k].ToUpper()))
+                        { //dt.Rows[j][ii] = "";                    
+                        dt.Rows.RemoveAt(j);j--;}
                 }
-    }
-       // dataGridView2.DataSource = dt;
+            // удаляем ненужные слова
+            for (int k = 0; k < wastewords.Length; k++)
+                for (int ii = 0; ii < 2; ii++)
+                    for (int j = 0; j < dt.Rows.Count; j++)
+                    {
+                    //int ii = 0;
+                        if (dt.Rows[j][ii].ToString().Replace(" ", string.Empty).ToUpper().Contains(wastewords[k].ToUpper()))                            
+                            dt.Rows[j][ii] = dt.Rows[j][ii].ToString().Replace(wastewords[k].ToUpper(),"");
+                    
+                }
+            ////////////
+
+            ////////////////////
+            //перестраиваем таблицу под новый формат
+            DataTable dt1 = new DataTable("tab1");
+
+            i = 0;
+            DataColumn gr = new DataColumn(i++.ToString(), typeof(String));
+            DataColumn date = new DataColumn(i++.ToString(), typeof(String));
+            DataColumn nomer = new DataColumn(i++.ToString(), typeof(String));
+            DataColumn displ = new DataColumn(i++.ToString(), typeof(String));
+            DataColumn prpd = new DataColumn(i++.ToString(), typeof(String));
+            dt1.Columns.AddRange(new DataColumn[] { gr, date, nomer, displ, prpd });
+            DataRow dr1 = null;
+
+            string[] groups = { "11 ГРУПА", "12 ГРУПА", "13 ГРУПА", "14 ГРУПА", "15 ГРУПА",
+                    "212 ГРУПА", "22 ГРУПА", "23 ГРУПА", "24 ГРУПА", "25 ГРУПА",
+                "31 ГРУПА", "32 ГРУПА", "33 ГРУПА", "34 ГРУПА", "35 ГРУПА",
+                "41 ГРУПА", "42 ГРУПА", "43 ГРУПА", "44 ГРУПА", "45 ГРУПА",
+                "51 ГРУПА", "52 ГРУПА", "53 ГРУПА", "54 ГРУПА", "55 ГРУПА",
+                "61 ГРУПА", "62 ГРУПА", "63 ГРУПА", "64 ГРУПА", "65 ГРУПА",
+                "71 ГРУПА", "72 ГРУПА", "73 ГРУПА", "74 ГРУПА", "75 ГРУПА",
+                "17 ГРУПА", "18 ГРУПА", "19 ГРУПА", "16 ГРУПА"};
+         //   string[] stolb1bad = { "ДНІ", "ПАРИ"};
+            //ищем ячеки с группой
+            int stroka=0;
+            foreach (string group in groups)
+                for (int ii = 0; ii < dt.Columns.Count; ii++)
+                    for (int j = 0; j < dt.Rows.Count; j++)
+                        if (group == dt.Rows[j][ii].ToString().ToUpper())
+                            // нашли столбец ii  и начальную строку j
+                                 { int strk=j+2;
+                            while(strk<dt.Rows.Count&&dt.Rows[strk][0].ToString()!="")
+                            { 
+                            //     for (int jj = stroka; jj < dt.Rows.Count; jj++)
+                            //     {
+                            //  for (int k = 0; k < stolb1bad.Length; k++)
+                            //        foreach(string badword in stolb1bad)
+                            //if (!dt.Rows[jj][ii].ToString().ToUpper().Contains(badword.ToUpper()))
+
+                            //       {// textBox1.Text +=group;
+                            //       textBox1.Text += group+dt.Rows[jj][0].ToString().ToUpper()+ badword+Environment.NewLine;
+                            //textBox1.Text += dt.Rows[strk][0].ToString()+"+"+ii.ToString() + "+" + j.ToString() + "=" + group+ "_"+dt.Rows[strk][ii].ToString()+ Environment.NewLine;// + dt.Rows[jj][0].ToString().ToUpper() ;
+                              
+                                dr1 = dt1.NewRow();
+
+                                dr1[0] =group ;
+                                    dr1[1] = dt.Rows[strk][0].ToString();// dat
+                                    dr1[2] = dt.Rows[strk][1].ToString(); ; //nom
+                                    dr1[3] = dt.Rows[strk][ii].ToString(); //prdm
+
+                                dt1.Rows.Add(dr1);
+
+                                strk++;
+                           //         stroka = jj;
+              //                      break;
+                             //   }//break;
+                            }
+                        }
+
+
+            
+            //DataRow dr1 = null;
+            dr1 = dt1.NewRow();
+            
+                dr1[0] = "22";
+            
+            dt1.Rows.Add(dr1);
+            //DataColumn a1 = new DataColumn(i++.ToString(), typeof(String));
+            dataGridView2.DataSource = dt1;
+        }
+
+       
 
     }
 }
