@@ -115,35 +115,43 @@ namespace csv2dg
                             // нашли столбец ii  и начальную строку j
                                  { int strk=j+2;
                             while(strk<dt.Rows.Count&&dt.Rows[strk][0].ToString()!="")
-                            { 
-                            //     for (int jj = stroka; jj < dt.Rows.Count; jj++)
-                            //     {
-                            //  for (int k = 0; k < stolb1bad.Length; k++)
-                            //        foreach(string badword in stolb1bad)
-                            //if (!dt.Rows[jj][ii].ToString().ToUpper().Contains(badword.ToUpper()))
+                            {
+                                //     for (int jj = stroka; jj < dt.Rows.Count; jj++)
+                                //     {
+                                //  for (int k = 0; k < stolb1bad.Length; k++)
+                                //        foreach(string badword in stolb1bad)
+                                //if (!dt.Rows[jj][ii].ToString().ToUpper().Contains(badword.ToUpper()))
 
-                            //       {// textBox1.Text +=group;
-                            //       textBox1.Text += group+dt.Rows[jj][0].ToString().ToUpper()+ badword+Environment.NewLine;
-                            //textBox1.Text += dt.Rows[strk][0].ToString()+"+"+ii.ToString() + "+" + j.ToString() + "=" + group+ "_"+dt.Rows[strk][ii].ToString()+ Environment.NewLine;// + dt.Rows[jj][0].ToString().ToUpper() ;
-                              
+                                //       {// textBox1.Text +=group;
+                                //       textBox1.Text += group+dt.Rows[jj][0].ToString().ToUpper()+ badword+Environment.NewLine;
+                                //textBox1.Text += dt.Rows[strk][0].ToString()+"+"+ii.ToString() + "+" + j.ToString() + "=" + group+ "_"+dt.Rows[strk][ii].ToString()+ Environment.NewLine;// + dt.Rows[jj][0].ToString().ToUpper() ;
+
+
+          
                                 dr1 = dt1.NewRow();
-
-                                dr1[0] =group ;
-                                    dr1[1] = dt.Rows[strk][0].ToString().Replace(" ", string.Empty).ToUpper();// dat
+                                
+                                {
+                                    dr1[0] = group.Replace("ГРУПА", string.Empty).Replace(" ", string.Empty);
+                                    // адапитировать дату в мускл
+                                    string g= dt.Rows[strk][0].ToString().Replace(" ", string.Empty).ToUpper();
+                                    int f = g.IndexOf(".", 0);
+                                    if (f>0)dr1[1] = "2016" + g.Substring(f, g.Length - f)+"."+g.Substring(0, f);// dat
+                                    //dr1[1] = "2016-"+dt.Rows[strk][0].ToString().Replace(" ", string.Empty).ToUpper();// dat
                                     dr1[2] = dt.Rows[strk][1].ToString().Replace(" ", string.Empty).ToUpper();  //nom
-                                foreach (string razdelitel in razdel_v)
-                                {string d= dt.Rows[strk][ii].ToString().Replace(" ", string.Empty).ToUpper();
-                                    int a = d.IndexOf(razdelitel,0);
-                                    if (a > 0)
-                                    {
-                                        dr1[3] = d.Substring(0, a);
-                                        dr1[4] = d.Substring(a,d.Length-a);
+                                    foreach (string razdelitel in razdel_v)
+                                    { string d = dt.Rows[strk][ii].ToString().Replace(" ", string.Empty).ToUpper();
+                                        int a = d.IndexOf(razdelitel, 0);
+                                        if (a > 0)
+                                        {
+                                            dr1[3] = d.Substring(0, a);
+                                            dr1[4] = d.Substring(a, d.Length - a);
+                                        }
                                     }
-                                }
                                     // dr1[3] = dt.Rows[strk][ii].ToString().Replace(" ", string.Empty).ToUpper(); //prdm
-
-                                dt1.Rows.Add(dr1);
-
+                                    // если не пустые
+                                    if (dr1[3].ToString()!="")
+                                        dt1.Rows.Add(dr1);
+                                }
                                 strk++;
                            //         stroka = jj;
               //                      break;
@@ -161,10 +169,10 @@ namespace csv2dg
             foreach (DataRow row in dt1.Rows)
             {
                 IEnumerable<string> fields = row.ItemArray.Select(field => field.ToString());
-                sb.AppendLine(string.Join(";", fields));
+                sb.AppendLine(string.Join("; ", fields));
             }
             textBox1.Text = sb.ToString();
-            File.WriteAllText("test.csv", sb.ToString());
+            File.WriteAllText("test.csv", sb.ToString(), Encoding.UTF8);
             //////
         }
 
