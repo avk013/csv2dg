@@ -190,6 +190,7 @@ namespace csv2dg
                 sb.AppendLine(string.Join("; ", fields));
             }
             textBox1.Text = sb.ToString();
+            File.Delete("test.csv");
             File.WriteAllText("test.csv", sb.ToString(), Encoding.UTF8);
             //////
         }
@@ -199,49 +200,44 @@ namespace csv2dg
             Excel.Application excel = new Excel.Application();
             excel.Visible = true;
            Excel.Workbook newWorkbook = excel.Workbooks.Add();
-             OpenFileDialog openFileDialog1 = new OpenFileDialog();
+           OpenFileDialog openFileDialog1 = new OpenFileDialog();
             openFileDialog1.Filter = "Text Files|*.xls";
             openFileDialog1.Title = "исходник";
-            openFileDialog1.FileName = "rozklad";
+            openFileDialog1.FileName = "от_Высших";
             //MessageBox.Show("файл с сайтами");
             string path="";
             if (openFileDialog1.ShowDialog() == System.Windows.Forms.DialogResult.OK)
                 path = openFileDialog1.FileName;
-            if (path.Length > 0)
-            /*  
-                 Excel.Workbook wb = excel.Workbooks.Open(path);
-                 excel.SheetsInNewWorkbook = 7;
-                 excel.Workbooks.Add(Type.Missing);
-           
-             */
+            if (path.Length > 0)            
             {
                 string workbookPath = path;
+                File.Delete(Path.GetTempPath()+"1234.xlsm");
+                File.Delete(Path.GetTempPath() + "rozklad.csv");
+                //File.Delete(Environment.SpecialFolder.Desktop + "rozklad.csv");
                 Excel.Workbook excelWorkbook = excel.Workbooks.Open(workbookPath,
                  0, true, 5, "", "", true, Microsoft.Office.Interop.Excel.XlPlatform.xlWindows, "\t", false, false, 0, true, 1, 0);
-
-                excelWorkbook.SaveAs("1234", 52);
+                excelWorkbook.SaveAs(Path.GetTempPath()+"1234", 52);
                 VBIDE.VBComponent oModule;
                 oModule = excelWorkbook.VBProject.VBComponents.Add(VBIDE.vbext_ComponentType.vbext_ct_StdModule);
                 oModule.Name = "go";
-
-
-                //   excelWorkbook.SaveAs(string.Format("EcoEtech_Commande_Fournisseur\\{0}.xls", path) + path, Excel.XlFileFormat.xlWorkbookNormal, misValue, misValue, misValue, misValue, Excel.XlSaveAsAccessMode.xlExclusive, misValue, misValue, misValue, misValue, misValue);
-                //  excelWorkbook.SaveAs("macro", Excel.XlFileFormat.xlIntlMacro, Type.Missing, Type.Missing, true, false, Excel.XlSaveAsAccessMode.xlNoChange, Excel.XlSaveConflictResolution.xlLocalSessionChanges);
-                //VBIDE.VBComponent oModule;
-                              String sCode;
-                //            oModule = excel.VBE.ActiveVBProject.VBComponents.Add(VBIDE.vbext_ComponentType.vbext_ct_StdModule);
-                //oModule = excel.VBE.VBProjects.Add(VBIDE.vbext_ComponentType.vbext_ct_StdModule);
-                //oModule = excel.VBProject.VBComponents.Add(VBIDE.vbext_ComponentType.vbext_ct_StdModule);
-                      sCode = "sub [Назнаваие макроса]()\r\n" +
-                             "   Cells.Select\r\n " +
-                           "   Selection.Subtotal GroupBy:=1, Function:=xlSum, TotalList:=Array(6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18,19,20,21,22,23,24,25,26,27,29,30), Replace:=False, PageBreaks:=False, SummaryBelowData:=False\r\n " +
-                         "   Selection.Subtotal GroupBy:=2, Function:=xlSum, TotalList:=Array(6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18,19,20,21,22,23,24,25,26,27,29,30), Replace:=False, PageBreaks:=False, SummaryBelowData:=False\r\n " +
-                       "end sub\r\n";
+                string sCode = System.IO.File.ReadAllText(@"G:\project\excell_rozklad\exel_file.vba", Encoding.Default);//.Replace("\n", " ");
                 // Добавление в макрос кода .
-                          oModule.CodeModule.AddFromString(sCode);
-                        sCode = null;
+                oModule.CodeModule.AddFromString(sCode);
+                sCode = null;
+                excel.Run("m");
+                excelWorkbook.Close(false);
+                newWorkbook.Close(false);
+                excel.Quit();
+                //File.Delete(Path.GetTempPath()+"1234.xlsm");
+                File.Copy(Path.GetTempPath() + "rozklad.csv", Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "\\rozklad.csv");
+                File.Delete(Path.GetTempPath() + "rozklad.csv");
 
             }
+        }
+
+        private void button3_Click(object sender, EventArgs e)
+        {
+            textBox1.Text = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
         }
     }
 }

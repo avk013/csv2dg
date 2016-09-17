@@ -36,6 +36,7 @@ oSheet.name = name 'I?enaaeaaai aio eiy "Iiaue eeno"
     If Not rng Is Nothing Then rng.Delete
 '
 ActiveSheet.Copy
+Kill(rozklad.csv)
 ActiveWorkbook.SaveAs ThisWorkbook.Path & "\" & "rozklad.csv", xlCSV, CreateBackup:=False, Local:=True
 ActiveWorkbook.Close 0
 End Sub
