@@ -9,11 +9,16 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Text.RegularExpressions;
+using Excel = Microsoft.Office.Interop.Excel;
+using VBIDE=Microsoft.Vbe.Interop;
+using Office = Microsoft.Office.Core;
 
 namespace csv2dg
 {
     public partial class Form1 : Form
     {
+        private object ExcelApplication;
+
         public Form1()
         {
             InitializeComponent();
@@ -39,7 +44,17 @@ namespace csv2dg
             DataColumn a10 = new DataColumn(i++.ToString(), typeof(String));
             //}
             dt.Columns.AddRange(new DataColumn[] {a0,a1,a2,a3,a4,a5,a6,a7,a8,a9,a10});
-            string path = @"G:\project\excell_rozklad\rozklad.csv";
+            //открываем файл
+            OpenFileDialog openFileDialog1 = new OpenFileDialog();
+            openFileDialog1.Filter = "Text Files|*.csv";
+            openFileDialog1.Title = "фал после обработки ВБА";
+            openFileDialog1.FileName = "rozklad";
+            //MessageBox.Show("файл с сайтами");
+            string path;
+            if (openFileDialog1.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+                path=openFileDialog1.FileName;
+            //иначе по умолчанию
+            else path = @"G:\project\excell_rozklad\rozklad.csv";
             //string path = @"rozklad.csv";
             string[] tab0 = File.ReadAllLines(path, Encoding.Default);
             string[] tab0Values = null;
@@ -97,13 +112,16 @@ namespace csv2dg
             DataRow dr1 = null;
 
             string[] groups = { "11 ГРУПА", "12 ГРУПА", "13 ГРУПА", "14 ГРУПА", "15 ГРУПА",
-                    "212 ГРУПА", "22 ГРУПА", "23 ГРУПА", "24 ГРУПА", "25 ГРУПА",
+                "22 ГРУПА", "23 ГРУПА", "24 ГРУПА", "25 ГРУПА",
                 "31 ГРУПА", "32 ГРУПА", "33 ГРУПА", "34 ГРУПА", "35 ГРУПА",
                 "41 ГРУПА", "42 ГРУПА", "43 ГРУПА", "44 ГРУПА", "45 ГРУПА",
                 "51 ГРУПА", "52 ГРУПА", "53 ГРУПА", "54 ГРУПА", "55 ГРУПА",
                 "61 ГРУПА", "62 ГРУПА", "63 ГРУПА", "64 ГРУПА", "65 ГРУПА",
                 "71 ГРУПА", "72 ГРУПА", "73 ГРУПА", "74 ГРУПА", "75 ГРУПА",
-                "17 ГРУПА", "18 ГРУПА", "19 ГРУПА", "16 ГРУПА"};
+                "17 ГРУПА", "18 ГРУПА", "19 ГРУПА", "16 ГРУПА", "211ГРУПА",
+                "212ГРУПА", "221ГРУПА", "222ГРУПА", "311 ГРУПА",
+                "312 ГРУПА", "321 ГРУПА", "322 ГРУПА", "511 ГРУПА",
+                "512 ГРУПА" };
             string[] razdel_v = { "ДОЦ.","ВИКЛ."};
          //   string[] stolb1bad = { "ДНІ", "ПАРИ"};
             //ищем ячеки с группой
@@ -111,7 +129,7 @@ namespace csv2dg
             foreach (string group in groups)
                 for (int ii = 0; ii < dt.Columns.Count; ii++)
                     for (int j = 0; j < dt.Rows.Count; j++)
-                        if (group == dt.Rows[j][ii].ToString().ToUpper())
+                        if (group.ToUpper().Replace(" ", string.Empty) == dt.Rows[j][ii].ToString().ToUpper().Replace(" ", string.Empty))
                             // нашли столбец ii  и начальную строку j
                                  { int strk=j+2;
                             while(strk<dt.Rows.Count&&dt.Rows[strk][0].ToString()!="")
@@ -131,7 +149,7 @@ namespace csv2dg
                                 dr1 = dt1.NewRow();
                                 
                                 {
-                                    dr1[0] = group.Replace("ГРУПА", string.Empty).Replace(" ", string.Empty);
+                                    dr1[0] = group.ToUpper().Replace("ГРУПА", string.Empty).Replace(" ", string.Empty);
                                     // адапитировать дату в мускл
                                     string g= dt.Rows[strk][0].ToString().Replace(" ", string.Empty).ToUpper();
                                     int f = g.IndexOf(".", 0);
@@ -176,7 +194,54 @@ namespace csv2dg
             //////
         }
 
-       
+        private void button2_Click(object sender, EventArgs e)
+        {
+            Excel.Application excel = new Excel.Application();
+            excel.Visible = true;
+           Excel.Workbook newWorkbook = excel.Workbooks.Add();
+             OpenFileDialog openFileDialog1 = new OpenFileDialog();
+            openFileDialog1.Filter = "Text Files|*.xls";
+            openFileDialog1.Title = "исходник";
+            openFileDialog1.FileName = "rozklad";
+            //MessageBox.Show("файл с сайтами");
+            string path="";
+            if (openFileDialog1.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+                path = openFileDialog1.FileName;
+            if (path.Length > 0)
+            /*  
+                 Excel.Workbook wb = excel.Workbooks.Open(path);
+                 excel.SheetsInNewWorkbook = 7;
+                 excel.Workbooks.Add(Type.Missing);
+           
+             */
+            {
+                string workbookPath = path;
+                Excel.Workbook excelWorkbook = excel.Workbooks.Open(workbookPath,
+                 0, true, 5, "", "", true, Microsoft.Office.Interop.Excel.XlPlatform.xlWindows, "\t", false, false, 0, true, 1, 0);
 
+                excelWorkbook.SaveAs("1234", 52);
+                VBIDE.VBComponent oModule;
+                oModule = excelWorkbook.VBProject.VBComponents.Add(VBIDE.vbext_ComponentType.vbext_ct_StdModule);
+                oModule.Name = "go";
+
+
+                //   excelWorkbook.SaveAs(string.Format("EcoEtech_Commande_Fournisseur\\{0}.xls", path) + path, Excel.XlFileFormat.xlWorkbookNormal, misValue, misValue, misValue, misValue, Excel.XlSaveAsAccessMode.xlExclusive, misValue, misValue, misValue, misValue, misValue);
+                //  excelWorkbook.SaveAs("macro", Excel.XlFileFormat.xlIntlMacro, Type.Missing, Type.Missing, true, false, Excel.XlSaveAsAccessMode.xlNoChange, Excel.XlSaveConflictResolution.xlLocalSessionChanges);
+                //VBIDE.VBComponent oModule;
+                              String sCode;
+                //            oModule = excel.VBE.ActiveVBProject.VBComponents.Add(VBIDE.vbext_ComponentType.vbext_ct_StdModule);
+                //oModule = excel.VBE.VBProjects.Add(VBIDE.vbext_ComponentType.vbext_ct_StdModule);
+                //oModule = excel.VBProject.VBComponents.Add(VBIDE.vbext_ComponentType.vbext_ct_StdModule);
+                      sCode = "sub [Назнаваие макроса]()\r\n" +
+                             "   Cells.Select\r\n " +
+                           "   Selection.Subtotal GroupBy:=1, Function:=xlSum, TotalList:=Array(6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18,19,20,21,22,23,24,25,26,27,29,30), Replace:=False, PageBreaks:=False, SummaryBelowData:=False\r\n " +
+                         "   Selection.Subtotal GroupBy:=2, Function:=xlSum, TotalList:=Array(6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18,19,20,21,22,23,24,25,26,27,29,30), Replace:=False, PageBreaks:=False, SummaryBelowData:=False\r\n " +
+                       "end sub\r\n";
+                // Добавление в макрос кода .
+                          oModule.CodeModule.AddFromString(sCode);
+                        sCode = null;
+
+            }
+        }
     }
 }
