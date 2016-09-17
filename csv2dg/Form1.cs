@@ -10,14 +10,15 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Text.RegularExpressions;
 using Excel = Microsoft.Office.Interop.Excel;
-using VBIDE=Microsoft.Vbe.Interop;
+using VBIDE = Microsoft.Vbe.Interop;
 using Office = Microsoft.Office.Core;
 
 namespace csv2dg
 {
     public partial class Form1 : Form
     {
-        private object ExcelApplication;
+//        private int applicationHwnd;
+  //      private object ExcelApplication;
 
         public Form1()
         {
@@ -54,7 +55,8 @@ namespace csv2dg
             if (openFileDialog1.ShowDialog() == System.Windows.Forms.DialogResult.OK)
                 path=openFileDialog1.FileName;
             //иначе по умолчанию
-            else path = @"G:\project\excell_rozklad\rozklad.csv";
+            else path = @Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "\\rozklad.csv";
+            //else path = @"G:\project\excell_rozklad\rozklad.csv";
             //string path = @"rozklad.csv";
             string[] tab0 = File.ReadAllLines(path, Encoding.Default);
             string[] tab0Values = null;
@@ -223,21 +225,28 @@ namespace csv2dg
                 string sCode = System.IO.File.ReadAllText(@"G:\project\excell_rozklad\exel_file.vba", Encoding.Default);//.Replace("\n", " ");
                 // Добавление в макрос кода .
                 oModule.CodeModule.AddFromString(sCode);
-                sCode = null;
                 excel.Run("m");
                 excelWorkbook.Close(false);
                 newWorkbook.Close(false);
                 excel.Quit();
-                //File.Delete(Path.GetTempPath()+"1234.xlsm");
+                File.Delete(Path.GetTempPath()+"1234.xlsm");//лишнее удаляем
+                File.Delete(Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "\\rozklad.csv");
                 File.Copy(Path.GetTempPath() + "rozklad.csv", Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "\\rozklad.csv");
-                File.Delete(Path.GetTempPath() + "rozklad.csv");
-
+                File.Delete(Path.GetTempPath() + "rozklad.csv");//результат на раб стол
+                //собираем мусор
+                excelWorkbook=null; sCode = null;newWorkbook = null;
+                oModule = null; excel = null;
+                GC.Collect();
+               
             }
         }
 
         private void button3_Click(object sender, EventArgs e)
+        {textBox1.Text = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);}
+
+        private void Form1_Load(object sender, EventArgs e)
         {
-            textBox1.Text = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+
         }
     }
 }
