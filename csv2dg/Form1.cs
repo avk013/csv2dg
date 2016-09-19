@@ -49,7 +49,8 @@ namespace csv2dg
             sb.Append("--");sb.Append(boundary);sb.Append("\r\n");
             sb.Append("Content-Disposition: form-data; name=\"");
             sb.Append(fileFormName);sb.Append("\"; filename=\"");
-            sb.Append(Path.GetFileName(uploadfile));
+            //sb.Append(Path.GetFileName(uploadfile));
+            sb.Append(Path.GetFileName(uploadfile).Substring(0, (Path.GetFileName(uploadfile).Length-4)));
             sb.Append("\"");sb.Append("\r\n");sb.Append("Content-Type: ");
             sb.Append(contenttype);sb.Append("\r\n");sb.Append("\r\n");
             string postHeader = sb.ToString();
