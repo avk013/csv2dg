@@ -28,7 +28,7 @@ namespace csv2dg
         }
         public static string UploadFileEx(string uploadfile, string url,
            string fileFormName, string contenttype, NameValueCollection querystring,
-           CookieContainer cookies)//процедура загрузки
+           CookieContainer cookies, TextBox ino=null, TextBox outo=null)//процедура загрузки
         {if ((fileFormName == null) || (fileFormName.Length == 0))
             {fileFormName = "file";}
          if ((contenttype == null) || (contenttype.Length == 0))
@@ -54,6 +54,7 @@ namespace csv2dg
             sb.Append("\"");sb.Append("\r\n");sb.Append("Content-Type: ");
             sb.Append(contenttype);sb.Append("\r\n");sb.Append("\r\n");
             string postHeader = sb.ToString();
+            if (ino!=null) ino.Text = url + postdata+postHeader;
             byte[] postHeaderBytes = Encoding.UTF8.GetBytes(postHeader);
             // Build the trailing boundary string as a byte array
             // ensuring the boundary appears on a line by itself
@@ -247,8 +248,11 @@ namespace csv2dg
                 sb.AppendLine(string.Join("; ", fields));
             }
             textBox1.Text = sb.ToString();
-            File.Delete("test.csv");
-            File.WriteAllText("test.csv", sb.ToString(), Encoding.UTF8);
+            File.Delete(Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "\\rozklad.csv");
+            //File.Copy(Path.GetTempPath() + "rozklad.csv", Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "\\rozklad.csv");
+            //File.Delete("test.csv");
+            //File.WriteAllText("test.csv", sb.ToString(), Encoding.UTF8);
+            File.WriteAllText(Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "\\rozklad.csv", sb.ToString(), Encoding.UTF8);
             //////
         }
 
@@ -256,7 +260,7 @@ namespace csv2dg
         {
             Excel.Application excel = new Excel.Application();
             excel.Visible = true;
-           Excel.Workbook newWorkbook = excel.Workbooks.Add();
+           //Excel.Workbook newWorkbook = excel.Workbooks.Add();
            OpenFileDialog openFileDialog1 = new OpenFileDialog();
             openFileDialog1.Filter = "Text Files|*.xls";
             openFileDialog1.Title = "исходник";
@@ -270,7 +274,7 @@ namespace csv2dg
                 string workbookPath = path;
                 File.Delete(Path.GetTempPath()+"1234.xlsm");
                 File.Delete(Path.GetTempPath() + "rozklad.csv");
-                //File.Delete(Environment.SpecialFolder.Desktop + "rozklad.csv");
+               ////File.Delete(Environment.SpecialFolder.Desktop + "rozklad.csv");
                 Excel.Workbook excelWorkbook = excel.Workbooks.Open(workbookPath,
                  0, true, 5, "", "", true, Microsoft.Office.Interop.Excel.XlPlatform.xlWindows, "\t", false, false, 0, true, 1, 0);
                 excelWorkbook.SaveAs(Path.GetTempPath()+"1234", 52);
@@ -282,14 +286,15 @@ namespace csv2dg
                 oModule.CodeModule.AddFromString(sCode);
                 excel.Run("m");
                 excelWorkbook.Close(false);
-                newWorkbook.Close(false);
+             ////   newWorkbook.Close(false);
                 excel.Quit();
                 File.Delete(Path.GetTempPath()+"1234.xlsm");//лишнее удаляем
                 File.Delete(Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "\\rozklad.csv");
                 File.Copy(Path.GetTempPath() + "rozklad.csv", Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "\\rozklad.csv");
                 File.Delete(Path.GetTempPath() + "rozklad.csv");//результат на раб стол
                 //собираем мусор
-                excelWorkbook=null; sCode = null;newWorkbook = null;
+                excelWorkbook=null; sCode = null;
+                ////newWorkbook = null;
                 oModule = null; excel = null;
                 GC.Collect();
                
@@ -310,14 +315,14 @@ namespace csv2dg
         //add or use cookies
         NameValueCollection querystring = new NameValueCollection();
         querystring["uname"]="uname";
-querystring["passwd"]="snake3";
+querystring["passwd"]="rozklad";
 string uploadfile;// set to file to upload
-        uploadfile = "g:\\image.jpg";
+        uploadfile = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "\\rozklad.csv";
 
 //everything except upload file and url can be left blank if needed
 string outdata = UploadFileEx(uploadfile,
      "http://fei.idgu.edu.ua/rozklad+/server/file.php", "uploadfile", "image/pjpeg",
-     querystring, cookies);
+     querystring, cookies, textBox2);
             textBox1.Text = outdata;
         }
  
