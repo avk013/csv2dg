@@ -19,9 +19,9 @@ namespace csv2dg
 {
     public partial class Form1 : Form
     {
-//        private int applicationHwnd;
-  //      private object ExcelApplication;
-
+        //        private int applicationHwnd;
+        //      private object ExcelApplication;
+        string file_path= @"G:\project\excell_rozklad\";
         public Form1()
         {
             InitializeComponent();
@@ -227,21 +227,13 @@ namespace csv2dg
                                     // если не пустые
                                     if (dr1[3].ToString()!="")
                                         dt1.Rows.Add(dr1);
-                                }
-                                strk++;
-                           //         stroka = jj;
-              //                      break;
-                             //   }//break;
-                            }
-                        }
+                                } strk++;}}
             dataGridView2.DataSource = dt1;
             //////
             StringBuilder sb = new StringBuilder();
-
             IEnumerable<string> columnNames = dt1.Columns.Cast<DataColumn>().
                                               Select(column => column.ColumnName);
            // sb.AppendLine(string.Join(",", columnNames));
-
             foreach (DataRow row in dt1.Rows)
             {
                 IEnumerable<string> fields = row.ItemArray.Select(field => field.ToString());
@@ -281,7 +273,48 @@ namespace csv2dg
                 VBIDE.VBComponent oModule;
                 oModule = excelWorkbook.VBProject.VBComponents.Add(VBIDE.vbext_ComponentType.vbext_ct_StdModule);
                 oModule.Name = "go";
-                string sCode = System.IO.File.ReadAllText(@"G:\project\excell_rozklad\exel_file.vba", Encoding.Default);//.Replace("\n", " ");
+    //string sCode = System.IO.File.ReadAllText(file_path+"exel_file.vba", Encoding.Default);//.Replace("\n", " ");
+   //or
+                string sCode = "Sub ununion() ' объединенные области разъединяем и заполняем \n"+
+    "Dim rCell As Range, sValue$, sAddress$, i& \n" +
+    "Application.ScreenUpdating = False\n" +
+      "Set iSource = [A1: L600]\n" +
+       " For Each rCell In iSource\n" +
+    "If rCell.MergeCells Then\n" +
+     "   sAddress = rCell.MergeArea.Address: rCell.UnMerge\n" +
+      "  Range(sAddress).Value = rCell.Value\n" +
+    "End If\n" +
+    "Next\n" +
+    "Application.ScreenUpdating = True\n" +
+"End Sub\n" +
+"Sub m()\n" +
+"Dim name As String\n" +
+"name = \"result\"\n" +
+"Dim oSheet As Excel.Worksheet\n" +
+"Set oSheet = Worksheets.Add()\n" +
+"oSheet.name = name\n" +
+ "   For i = 1 To Sheets.Count 'перебираем все листы\n" +
+  "      If Sheets(i).name <> name Then\n" +
+   "        myR_Total = Sheets(name).Range(\"A\" & Sheets(name).Rows.Count).End(xlUp).Row\n" +
+    "       myR_i = Sheets(i).Range(\"A\" & Sheets(i).Rows.Count).End(xlUp).Row\n" +
+     "      Sheets(i).Rows(\"1:\" & myR_i).Copy Destination:= Sheets(name).Range(\"A\" & myR_Total + 1)\n" +
+      "  End If\n" +
+    "Next\n" +
+ "Set ws = ActiveWorkbook.Sheets(name)\n" +
+ "ws.Activate\n" +
+  "  ununion\n" +
+"Dim r As Long, rng As Range ' удаляем пустые строки\n" +
+    "For r = 1 To ActiveSheet.UsedRange.Row - 1 + ActiveSheet.UsedRange.Rows.Count\n" +
+        "If Application.CountA(Rows(r)) = 0 Then\n" +
+         "   If rng Is Nothing Then Set rng = Rows(r) Else Set rng = Union(rng, Rows(r))\n" +
+        "End If\n" +
+    "Next r\n" +
+    "If Not rng Is Nothing Then rng.Delete\n" +
+"ActiveSheet.Copy\n" +
+"'Kill(\"rozklad.csv\") \n"+
+"ActiveWorkbook.SaveAs ThisWorkbook.Path & \"\\\" & \"rozklad.csv\", xlCSV, CreateBackup:=False, Local:=True\n" +
+"ActiveWorkbook.Close 0\n" +
+"End Sub";
                 // Добавление в макрос кода .
                 oModule.CodeModule.AddFromString(sCode);
                 excel.Run("m");
@@ -296,18 +329,12 @@ namespace csv2dg
                 excelWorkbook=null; sCode = null;
                 ////newWorkbook = null;
                 oModule = null; excel = null;
-                GC.Collect();
-               
-            }
-        }
-
+                GC.Collect();}}
         private void button3_Click(object sender, EventArgs e)
         {textBox1.Text = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);}
 
         private void Form1_Load(object sender, EventArgs e)
-        {
-
-        }
+        {}
       
         private void button4_Click(object sender, EventArgs e)
         {//вызов загрузки файла на сервер
@@ -318,13 +345,11 @@ namespace csv2dg
 querystring["passwd"]="rozklad";
 string uploadfile;// set to file to upload
         uploadfile = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "\\rozklad.csv";
-
 //everything except upload file and url can be left blank if needed
 string outdata = UploadFileEx(uploadfile,
      "http://fei.idgu.edu.ua/rozklad+/server/file.php", "uploadfile", "image/pjpeg",
      querystring, cookies, textBox2);
-            textBox1.Text = outdata;
-        }
- 
+     textBox1.Text = outdata;
+        } 
     }
 }
