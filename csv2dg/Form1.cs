@@ -132,6 +132,7 @@ namespace csv2dg
             }
 
             dataGridView1.DataSource = dt;
+            tabControl1.SelectedIndex = 0;
             //пытаемся почистить
             string[] badwords = {"розклад", "деканфак", "занятьфак" };
             string[] wastewords = { "ДНІ", "ПАРИ", "понеділок", "вівторок", "середа", "четвер", "п'ятниця", "субота", "неділя", "П’ЯТНИЦЯ" };
@@ -229,6 +230,7 @@ namespace csv2dg
                                         dt1.Rows.Add(dr1);
                                 } strk++;}}
             dataGridView2.DataSource = dt1;
+            tabControl1.SelectedIndex = 1;
             //////
             StringBuilder sb = new StringBuilder();
             IEnumerable<string> columnNames = dt1.Columns.Cast<DataColumn>().
@@ -350,6 +352,8 @@ string outdata = UploadFileEx(uploadfile,
      "http://fei.idgu.edu.ua/rozklad+/server/file.php", "uploadfile", "image/pjpeg",
      querystring, cookies, textBox2);
      textBox1.Text = outdata;
+            webBrowser1.Navigate("http://fei.idgu.edu.ua/rozklad+/?prp=1");
+            tabControl1.SelectedIndex = 5;
         } 
     }
 }
