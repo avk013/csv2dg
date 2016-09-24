@@ -258,7 +258,7 @@ namespace csv2dg
         private void button2_Click(object sender, EventArgs e)
         {
             Excel.Application excel = new Excel.Application();
-            excel.Visible = true;
+            //excel.Visible = true;
            //Excel.Workbook newWorkbook = excel.Workbooks.Add();
            OpenFileDialog openFileDialog1 = new OpenFileDialog();
             openFileDialog1.Filter = "Text Files|*.xls";
@@ -336,7 +336,7 @@ namespace csv2dg
                 //собираем мусор
                 excelWorkbook=null; sCode = null;
                 ////newWorkbook = null;
-                oModule = null; excel = null;
+                oModule = null; excel = null;               
                 GC.Collect();
 ////////
 
@@ -394,7 +394,7 @@ namespace csv2dg
             }
 
             dataGridView1.DataSource = dt;
-            tabControl1.SelectedIndex = 0;
+            tabControl1.SelectedIndex = 1;
         }
 
         private void button3_Click(object sender, EventArgs e)
@@ -416,7 +416,7 @@ string uploadfile;// set to file to upload
 string outdata = UploadFileEx(uploadfile,
      "http://fei.idgu.edu.ua/rozklad+/server/file.php", "uploadfile", "image/pjpeg",
      querystring, cookies, textBox2);
-     textBox1.Text = outdata;
+     textBox3.Text = outdata;
             webBrowser1.Navigate("http://fei.idgu.edu.ua/rozklad");
             tabControl1.SelectedIndex = 5;
         } 
