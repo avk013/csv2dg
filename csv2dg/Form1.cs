@@ -22,6 +22,8 @@ namespace csv2dg
         //        private int applicationHwnd;
         //      private object ExcelApplication;
         string file_path= @"G:\project\excell_rozklad\";
+        
+        int i = 0;
         public Form1()
         {
             InitializeComponent();
@@ -83,12 +85,10 @@ namespace csv2dg
 
         private void button1_Click(object sender, EventArgs e)
         {
+            /////считываем файл
+            i = 0;//dt.Clear();
             DataTable dt = new DataTable("tab0");
-            int i=0;
-            //for(int i=0;i<21;i++)
-            //{
-                //string a = i.ToString();
-            DataColumn  a0 = new DataColumn(i++.ToString(), typeof(String));
+            DataColumn a0 = new DataColumn(i++.ToString(), typeof(String));
             DataColumn a1 = new DataColumn(i++.ToString(), typeof(String));
             DataColumn a2 = new DataColumn(i++.ToString(), typeof(String));
             DataColumn a3 = new DataColumn(i++.ToString(), typeof(String));
@@ -99,19 +99,18 @@ namespace csv2dg
             DataColumn a8 = new DataColumn(i++.ToString(), typeof(String));
             DataColumn a9 = new DataColumn(i++.ToString(), typeof(String));
             DataColumn a10 = new DataColumn(i++.ToString(), typeof(String));
-            //}
-            dt.Columns.AddRange(new DataColumn[] {a0,a1,a2,a3,a4,a5,a6,a7,a8,a9,a10});
+            dt.Columns.AddRange(new DataColumn[] { a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10 });
             //открываем файл
-            OpenFileDialog openFileDialog1 = new OpenFileDialog();
-            openFileDialog1.Filter = "Text Files|*.csv";
+           OpenFileDialog openFileDialog1 = new OpenFileDialog();
+           openFileDialog1.Filter = "Text Files|*.csv";
             openFileDialog1.Title = "фал после обработки ВБА";
             openFileDialog1.FileName = "rozklad";
             //MessageBox.Show("файл с сайтами");
-            string path;
+            string path = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "\\rozklad.csv";
             if (openFileDialog1.ShowDialog() == System.Windows.Forms.DialogResult.OK)
-                path=openFileDialog1.FileName;
+              path = openFileDialog1.FileName;
             //иначе по умолчанию
-            else path = @Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "\\rozklad.csv";
+            //else path = @Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "\\rozklad.csv";
             //else path = @"G:\project\excell_rozklad\rozklad.csv";
             //string path = @"rozklad.csv";
             string[] tab0 = File.ReadAllLines(path, Encoding.Default);
@@ -124,18 +123,18 @@ namespace csv2dg
                     tab0Values = tab0[i].Split(';');
                     //создаём новую строку
                     dr = dt.NewRow();
-                    for(int j=0;j<8;j++)
-                    {string valp= tab0Values[j].ToUpper();
-                        dr[j] = Regex.Replace(valp, " {2,}", " ");}
+                    for (int j = 0; j < 8; j++)
+                    {
+                        string valp = tab0Values[j].ToUpper();
+                        dr[j] = Regex.Replace(valp, " {2,}", " ");
+                    }
                     dt.Rows.Add(dr);
                 }
             }
-
-            dataGridView1.DataSource = dt;
-            tabControl1.SelectedIndex = 0;
+            /////
             //пытаемся почистить
             string[] badwords = {"розклад", "деканфак", "занятьфак" };
-            string[] wastewords = { "ДНІ", "ПАРИ", "понеділок", "вівторок", "середа", "четвер", "п'ятниця", "субота", "неділя", "П’ЯТНИЦЯ" };
+            string[] wastewords = { "ДАТА", "ДНІ", "ПАРИ", "понеділок", "вівторок", "середа", "четвер", "п'ятниця", "субота", "неділя", "П’ЯТНИЦЯ" };
             // удаляем строки с плохими словами
             for (int k = 0; k < badwords.Length; k++)
                 for (int ii = 0; ii < dt.Columns.Count; ii++)
@@ -155,6 +154,8 @@ namespace csv2dg
                             dt.Rows[j][ii] = dt.Rows[j][ii].ToString().Replace(wastewords[k].ToUpper(),"");
                     
                 }
+            dataGridView2.DataSource = dt;
+            tabControl1.SelectedIndex = 2;
             ////////////
 
             ////////////////////
@@ -181,7 +182,7 @@ namespace csv2dg
                 "212ГРУПА", "221ГРУПА", "222ГРУПА", "311 ГРУПА",
                 "312 ГРУПА", "321 ГРУПА", "322 ГРУПА", "511 ГРУПА",
                 "512 ГРУПА" };
-            string[] razdel_v = { "ДОЦ.","ВИКЛ."};
+            string[] razdel_v = { "ДОЦ.","ВИКЛ.", "ПРОФ."};
          //   string[] stolb1bad = { "ДНІ", "ПАРИ"};
             //ищем ячеки с группой
             int stroka=0;
@@ -212,7 +213,8 @@ namespace csv2dg
                                     // адапитировать дату в мускл
                                     string g= dt.Rows[strk][0].ToString().Replace(" ", string.Empty).ToUpper();
                                     int f = g.IndexOf(".", 0);
-                                    if (f>0)dr1[1] = "2016" + g.Substring(f, g.Length - f)+"."+g.Substring(0, f);// dat
+                                    //if (f>0)dr1[1] = "2016" + g.Substring(f, g.Length - f)+"."+g.Substring(0, f);// dat
+                                    if (f > 0) dr1[1] = textBox4.Text + g.Substring(f, g.Length - f) + "." + g.Substring(0, f);// dat
                                     //dr1[1] = "2016-"+dt.Rows[strk][0].ToString().Replace(" ", string.Empty).ToUpper();// dat
                                     dr1[2] = dt.Rows[strk][1].ToString().Replace(" ", string.Empty).ToUpper();  //nom
                                     foreach (string razdelitel in razdel_v)
@@ -221,7 +223,10 @@ namespace csv2dg
                                         if (a > 0)
                                         {
                                             dr1[3] = d.Substring(0, a);
-                                            dr1[4] = d.Substring(a, d.Length - a);
+                                            d = d.Substring(a, d.Length - a);
+                                            dr1[4] =d.Substring(0,razdelitel.Length).ToLower()+d.Substring(razdelitel.Length,d.Length- razdelitel.Length);
+                                            //dr1[4] = d.Substring(0, razdelitel.Length).ToLower();
+                                            // понизить звание
                                         }
                                     }
                                     // dr1[3] = dt.Rows[strk][ii].ToString().Replace(" ", string.Empty).ToUpper(); //prdm
@@ -229,8 +234,8 @@ namespace csv2dg
                                     if (dr1[3].ToString()!="")
                                         dt1.Rows.Add(dr1);
                                 } strk++;}}
-            dataGridView2.DataSource = dt1;
-            tabControl1.SelectedIndex = 1;
+            dataGridView3.DataSource = dt1;
+            tabControl1.SelectedIndex = 3;
             //////
             StringBuilder sb = new StringBuilder();
             IEnumerable<string> columnNames = dt1.Columns.Cast<DataColumn>().
@@ -249,7 +254,7 @@ namespace csv2dg
             File.WriteAllText(Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "\\rozklad.csv", sb.ToString(), Encoding.UTF8);
             //////
         }
-
+ ///////////////////////////////////////////////////////////////////////
         private void button2_Click(object sender, EventArgs e)
         {
             Excel.Application excel = new Excel.Application();
@@ -259,6 +264,7 @@ namespace csv2dg
             openFileDialog1.Filter = "Text Files|*.xls";
             openFileDialog1.Title = "исходник";
             openFileDialog1.FileName = "от_Высших";
+            openFileDialog1.InitialDirectory = Environment.SpecialFolder.Desktop.ToString();
             //MessageBox.Show("файл с сайтами");
             string path="";
             if (openFileDialog1.ShowDialog() == System.Windows.Forms.DialogResult.OK)
@@ -331,7 +337,66 @@ namespace csv2dg
                 excelWorkbook=null; sCode = null;
                 ////newWorkbook = null;
                 oModule = null; excel = null;
-                GC.Collect();}}
+                GC.Collect();
+////////
+
+
+            ////////
+
+            }
+            DataTable dt = new DataTable("tab0");
+            i = 0;
+            //dt.Clear();
+            dt = new DataTable("tab0");
+            DataColumn a0 = new DataColumn(i++.ToString(), typeof(String));
+            DataColumn a1 = new DataColumn(i++.ToString(), typeof(String));
+            DataColumn a2 = new DataColumn(i++.ToString(), typeof(String));
+            DataColumn a3 = new DataColumn(i++.ToString(), typeof(String));
+            DataColumn a4 = new DataColumn(i++.ToString(), typeof(String));
+            DataColumn a5 = new DataColumn(i++.ToString(), typeof(String));
+            DataColumn a6 = new DataColumn(i++.ToString(), typeof(String));
+            DataColumn a7 = new DataColumn(i++.ToString(), typeof(String));
+            DataColumn a8 = new DataColumn(i++.ToString(), typeof(String));
+            DataColumn a9 = new DataColumn(i++.ToString(), typeof(String));
+            DataColumn a10 = new DataColumn(i++.ToString(), typeof(String));
+            dt.Columns.AddRange(new DataColumn[] { a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10 });
+            //открываем файл
+            //OpenFileDialog openFileDialog1 = new OpenFileDialog();
+            //openFileDialog1.Filter = "Text Files|*.csv";
+            //openFileDialog1.Title = "фал после обработки ВБА";
+            //openFileDialog1.FileName = "rozklad";
+            //MessageBox.Show("файл с сайтами");
+            path= Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "\\rozklad.csv";
+            //if (openFileDialog1.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+              //  path = openFileDialog1.FileName;
+            //иначе по умолчанию
+            //else path = @Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "\\rozklad.csv";
+            //else path = @"G:\project\excell_rozklad\rozklad.csv";
+            //string path = @"rozklad.csv";
+            string[] tab0 = File.ReadAllLines(path, Encoding.Default);
+            string[] tab0Values = null;
+            DataRow dr = null;
+            for (i = 0; i < tab0.Length; i++)
+            {
+                //if (!String.IsNullOrEmpty(tab0[i]))
+                {
+                    tab0Values = tab0[i].Split(';');
+                    //создаём новую строку
+                    dr = dt.NewRow();
+                    for (int j = 0; j < 8; j++)
+                    {
+                        //string valp = tab0Values[j];
+                        dr[j] = tab0Values[j];
+                        //Regex.Replace(valp, " {2,}", " ");
+                    }
+                    dt.Rows.Add(dr);
+                }
+            }
+
+            dataGridView1.DataSource = dt;
+            tabControl1.SelectedIndex = 0;
+        }
+
         private void button3_Click(object sender, EventArgs e)
         {textBox1.Text = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);}
 
@@ -352,7 +417,7 @@ string outdata = UploadFileEx(uploadfile,
      "http://fei.idgu.edu.ua/rozklad+/server/file.php", "uploadfile", "image/pjpeg",
      querystring, cookies, textBox2);
      textBox1.Text = outdata;
-            webBrowser1.Navigate("http://fei.idgu.edu.ua/rozklad+/?prp=1");
+            webBrowser1.Navigate("http://fei.idgu.edu.ua/rozklad");
             tabControl1.SelectedIndex = 5;
         } 
     }
