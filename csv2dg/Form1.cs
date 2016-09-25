@@ -253,6 +253,9 @@ namespace csv2dg
             //File.WriteAllText("test.csv", sb.ToString(), Encoding.UTF8);
             File.WriteAllText(Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "\\rozklad.csv", sb.ToString(), Encoding.UTF8);
             //////
+            button1.Visible = false;
+            
+            button4.Visible = true;
         }
  ///////////////////////////////////////////////////////////////////////
         private void button2_Click(object sender, EventArgs e)
@@ -395,13 +398,18 @@ namespace csv2dg
 
             dataGridView1.DataSource = dt;
             tabControl1.SelectedIndex = 1;
+            button2.Visible = false;
+            button1.Visible = true;
         }
 
         private void button3_Click(object sender, EventArgs e)
         {textBox1.Text = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);}
 
         private void Form1_Load(object sender, EventArgs e)
-        {}
+        {
+            button1.Visible = false;
+            button4.Visible = false;
+        }
       
         private void button4_Click(object sender, EventArgs e)
         {//вызов загрузки файла на сервер
@@ -419,6 +427,7 @@ string outdata = UploadFileEx(uploadfile,
      textBox3.Text = outdata;
             webBrowser1.Navigate("http://fei.idgu.edu.ua/rozklad");
             tabControl1.SelectedIndex = 5;
+            button4.Visible = false;
         } 
     }
 }
