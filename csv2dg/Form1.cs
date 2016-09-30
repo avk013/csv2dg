@@ -1,17 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
-using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Text.RegularExpressions;
 using Excel = Microsoft.Office.Interop.Excel;
 using VBIDE = Microsoft.Vbe.Interop;
-using Office = Microsoft.Office.Core;
 using System.Net;
 using System.Collections.Specialized;
 
@@ -104,7 +100,8 @@ namespace csv2dg
            OpenFileDialog openFileDialog1 = new OpenFileDialog();
            openFileDialog1.Filter = "Text Files|*.csv";
             openFileDialog1.Title = "фал после обработки ВБА";
-            openFileDialog1.FileName = "rozklad";
+            openFileDialog1.FileName = "rozklad.csv";
+            openFileDialog1.InitialDirectory=Environment.SpecialFolder.Desktop.ToString();
             //MessageBox.Show("файл с сайтами");
             string path = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "\\rozklad.csv";
             if (openFileDialog1.ShowDialog() == System.Windows.Forms.DialogResult.OK)
@@ -171,7 +168,7 @@ namespace csv2dg
             dt1.Columns.AddRange(new DataColumn[] { gr, date, nomer, displ, prpd });
             DataRow dr1 = null;
 
-            string[] groups = { "11 ГРУПА", "12 ГРУПА", "13 ГРУПА", "14 ГРУПА", "15 ГРУПА",
+            string[] groups = { "11 ГРУПА", "12 ГРУПА", "13 ГРУПА", "14 ГРУПА", "15 ГРУПА","12 група+         16 група",
                 "22 ГРУПА", "23 ГРУПА", "24 ГРУПА", "25 ГРУПА",
                 "31 ГРУПА", "32 ГРУПА", "33 ГРУПА", "34 ГРУПА", "35 ГРУПА",
                 "41 ГРУПА", "42 ГРУПА", "43 ГРУПА", "44 ГРУПА", "45 ГРУПА",
@@ -321,7 +318,24 @@ namespace csv2dg
         "End If\n" +
     "Next r\n" +
     "If Not rng Is Nothing Then rng.Delete\n" +
-"ActiveSheet.Copy\n" +
+        //удаляем перенос строки
+        "Dim MyRange As Range\n" +
+    "Application.ScreenUpdating = False\n" +
+    "Application.Calculation = xlCalculationManual\n" +
+
+
+    "For Each MyRange In ActiveSheet.UsedRange\n" +
+     "   If 0 < InStr(MyRange, Chr(10)) Then\n" +
+      "      MyRange = Replace(MyRange, Chr(10), \"\")\n" +
+       " End If\n" +
+    "Next\n" +
+
+
+    "Application.ScreenUpdating = True\n" +
+    "Application.Calculation = xlCalculationAutomatic\n" +
+
+                //
+                "ActiveSheet.Copy\n" +
 "'Kill(\"rozklad.csv\") \n"+
 "ActiveWorkbook.SaveAs ThisWorkbook.Path & \"\\\" & \"rozklad.csv\", xlCSV, CreateBackup:=False, Local:=True\n" +
 "ActiveWorkbook.Close 0\n" +
@@ -363,39 +377,23 @@ namespace csv2dg
             DataColumn a9 = new DataColumn(i++.ToString(), typeof(String));
             DataColumn a10 = new DataColumn(i++.ToString(), typeof(String));
             dt.Columns.AddRange(new DataColumn[] { a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10 });
-            //открываем файл
-            //OpenFileDialog openFileDialog1 = new OpenFileDialog();
-            //openFileDialog1.Filter = "Text Files|*.csv";
-            //openFileDialog1.Title = "фал после обработки ВБА";
-            //openFileDialog1.FileName = "rozklad";
-            //MessageBox.Show("файл с сайтами");
             path= Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "\\rozklad.csv";
-            //if (openFileDialog1.ShowDialog() == System.Windows.Forms.DialogResult.OK)
-              //  path = openFileDialog1.FileName;
-            //иначе по умолчанию
-            //else path = @Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "\\rozklad.csv";
-            //else path = @"G:\project\excell_rozklad\rozklad.csv";
-            //string path = @"rozklad.csv";
             string[] tab0 = File.ReadAllLines(path, Encoding.Default);
             string[] tab0Values = null;
             DataRow dr = null;
             for (i = 0; i < tab0.Length; i++)
             {
-                //if (!String.IsNullOrEmpty(tab0[i]))
                 {
                     tab0Values = tab0[i].Split(';');
                     //создаём новую строку
                     dr = dt.NewRow();
                     for (int j = 0; j < 8; j++)
                     {
-                        //string valp = tab0Values[j];
                         dr[j] = tab0Values[j];
-                        //Regex.Replace(valp, " {2,}", " ");
-                    }
+                         }
                     dt.Rows.Add(dr);
                 }
             }
-
             dataGridView1.DataSource = dt;
             tabControl1.SelectedIndex = 1;
             button2.Visible = false;
@@ -428,6 +426,21 @@ string outdata = UploadFileEx(uploadfile,
             webBrowser1.Navigate("http://fei.idgu.edu.ua/rozklad");
             tabControl1.SelectedIndex = 5;
             button4.Visible = false;
-        } 
+        }
+
+        private void checkBox1_CheckedChanged(object sender, EventArgs e)
+        {
+            if (checkBox1.Checked) button2.Visible = true; else button2.Visible =false; 
+        }
+
+        private void checkBox2_CheckedChanged(object sender, EventArgs e)
+        {
+            if (checkBox2.Checked) button1.Visible = true; else button1.Visible = false;
+        }
+
+        private void checkBox3_CheckedChanged(object sender, EventArgs e)
+        {
+            if (checkBox3.Checked) button4.Visible = true; else button4.Visible = false;
+        }
     }
 }
