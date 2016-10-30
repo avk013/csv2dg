@@ -77,6 +77,7 @@ namespace csv2dg
             WebResponse responce = webrequest.GetResponse();
             Stream s = responce.GetResponseStream();
             StreamReader sr = new StreamReader(s);
+            fileStream.Close();
             return sr.ReadToEnd(); }
 
         private void button1_Click(object sender, EventArgs e)
@@ -100,10 +101,10 @@ namespace csv2dg
            OpenFileDialog openFileDialog1 = new OpenFileDialog();
            openFileDialog1.Filter = "Text Files|*.csv";
             openFileDialog1.Title = "фал после обработки ВБА";
-            openFileDialog1.FileName = "rozklad.csv";
+            openFileDialog1.FileName = "rozklad0.csv";
             openFileDialog1.InitialDirectory=Environment.SpecialFolder.Desktop.ToString();
             //MessageBox.Show("файл с сайтами");
-            string path = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "\\rozklad.csv";
+            string path = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "\\rozklad0.csv";
             if (openFileDialog1.ShowDialog() == System.Windows.Forms.DialogResult.OK)
               path = openFileDialog1.FileName;
             //иначе по умолчанию
@@ -130,8 +131,8 @@ namespace csv2dg
             }
             /////
             //пытаемся почистить
-            string[] badwords = {"розклад", "деканфак", "занятьфак" };
-            string[] wastewords = { "ДАТА", "ДНІ", "ПАРИ", "понеділок", "вівторок", "середа", "четвер", "п'ятниця", "субота", "неділя", "П’ЯТНИЦЯ" };
+            string[] badwords = {"розклад", "деканфак", "занятьфак", "______" };
+            string[] wastewords = { "ДАТА", "ДНІ", "ПАРИ", "понеділок", "вівторок", "середа", "четвер", "п'ятниця", "субота", "неділя", "П’ЯТНИЦЯ", "П'ЯТНИЦЯ" };
             // удаляем строки с плохими словами
             for (int k = 0; k < badwords.Length; k++)
                 for (int ii = 0; ii < dt.Columns.Count; ii++)
@@ -179,14 +180,14 @@ namespace csv2dg
                 "212ГРУПА", "221ГРУПА", "222ГРУПА", "311 ГРУПА",
                 "312 ГРУПА", "321 ГРУПА", "322 ГРУПА", "511 ГРУПА",
                 "512 ГРУПА" };
-            string[] razdel_v = { "ДОЦ.","ВИКЛ.", "ПРОФ."};
+            string[] razdel_v = { "ДОЦ.","ВИКЛ.", "ПРОФ.", "МОВА"};
          //   string[] stolb1bad = { "ДНІ", "ПАРИ"};
             //ищем ячеки с группой
             int stroka=0;
             foreach (string group in groups)
                 for (int ii = 0; ii < dt.Columns.Count; ii++)
                     for (int j = 0; j < dt.Rows.Count; j++)
-                        if (group.ToUpper().Replace(" ", string.Empty) == dt.Rows[j][ii].ToString().ToUpper().Replace(" ", string.Empty))
+                        if ((group.ToUpper().Replace(" ", string.Empty) == dt.Rows[j][ii].ToString().ToUpper().Replace(" ", string.Empty))&& (group.ToUpper().Replace("ГРУПА", string.Empty).Replace(" ", string.Empty).Length<6))
                             // нашли столбец ii  и начальную строку j
                                  { int strk=j+2;
                             while(strk<dt.Rows.Count&&dt.Rows[strk][0].ToString()!="")
@@ -207,6 +208,7 @@ namespace csv2dg
                                 
                                 {
                                     dr1[0] = group.ToUpper().Replace("ГРУПА", string.Empty).Replace(" ", string.Empty);
+
                                     // адапитировать дату в мускл
                                     string g= dt.Rows[strk][0].ToString().Replace(" ", string.Empty).ToUpper();
                                     int f = g.IndexOf(".", 0);
@@ -222,6 +224,7 @@ namespace csv2dg
                                             dr1[3] = d.Substring(0, a);
                                             d = d.Substring(a, d.Length - a);
                                             dr1[4] =d.Substring(0,razdelitel.Length).ToLower()+d.Substring(razdelitel.Length,d.Length- razdelitel.Length);
+                                            break;
                                             //dr1[4] = d.Substring(0, razdelitel.Length).ToLower();
                                             // понизить звание
                                         }
@@ -244,11 +247,12 @@ namespace csv2dg
                 sb.AppendLine(string.Join("; ", fields));
             }
             textBox1.Text = sb.ToString();
-            File.Delete(Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "\\rozklad.csv");
+           //не File.Delete(Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "\\rozklad.csv");
             //File.Copy(Path.GetTempPath() + "rozklad.csv", Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "\\rozklad.csv");
             //File.Delete("test.csv");
             //File.WriteAllText("test.csv", sb.ToString(), Encoding.UTF8);
             File.WriteAllText(Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "\\rozklad.csv", sb.ToString(), Encoding.UTF8);
+            
             //////
             button1.Visible = false;
             
@@ -273,7 +277,7 @@ namespace csv2dg
             {
                 string workbookPath = path;
                 File.Delete(Path.GetTempPath()+"1234.xlsm");
-                File.Delete(Path.GetTempPath() + "rozklad.csv");
+                File.Delete(Path.GetTempPath() + "rozklad0.csv");
                ////File.Delete(Environment.SpecialFolder.Desktop + "rozklad.csv");
                 Excel.Workbook excelWorkbook = excel.Workbooks.Open(workbookPath,
                  0, true, 5, "", "", true, Microsoft.Office.Interop.Excel.XlPlatform.xlWindows, "\t", false, false, 0, true, 1, 0);
@@ -336,8 +340,8 @@ namespace csv2dg
 
                 //
                 "ActiveSheet.Copy\n" +
-"'Kill(\"rozklad.csv\") \n"+
-"ActiveWorkbook.SaveAs ThisWorkbook.Path & \"\\\" & \"rozklad.csv\", xlCSV, CreateBackup:=False, Local:=True\n" +
+"'Kill(\"rozklad0.csv\") \n"+
+"ActiveWorkbook.SaveAs ThisWorkbook.Path & \"\\\" & \"rozklad0.csv\", xlCSV, CreateBackup:=False, Local:=True\n" +
 "ActiveWorkbook.Close 0\n" +
 "End Sub";
                 // Добавление в макрос кода .
@@ -347,9 +351,9 @@ namespace csv2dg
              ////   newWorkbook.Close(false);
                 excel.Quit();
                 File.Delete(Path.GetTempPath()+"1234.xlsm");//лишнее удаляем
-                File.Delete(Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "\\rozklad.csv");
-                File.Copy(Path.GetTempPath() + "rozklad.csv", Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "\\rozklad.csv");
-                File.Delete(Path.GetTempPath() + "rozklad.csv");//результат на раб стол
+                File.Delete(Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "\\rozklad0.csv");
+                File.Copy(Path.GetTempPath() + "rozklad0.csv", Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "\\rozklad0.csv");
+                File.Delete(Path.GetTempPath() + "rozklad0.csv");//результат на раб стол
                 //собираем мусор
                 excelWorkbook=null; sCode = null;
                 ////newWorkbook = null;
@@ -377,7 +381,7 @@ namespace csv2dg
             DataColumn a9 = new DataColumn(i++.ToString(), typeof(String));
             DataColumn a10 = new DataColumn(i++.ToString(), typeof(String));
             dt.Columns.AddRange(new DataColumn[] { a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10 });
-            path= Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "\\rozklad.csv";
+            path= Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "\\rozklad0.csv";
             string[] tab0 = File.ReadAllLines(path, Encoding.Default);
             string[] tab0Values = null;
             DataRow dr = null;
@@ -426,6 +430,7 @@ string outdata = UploadFileEx(uploadfile,
             webBrowser1.Navigate("http://fei.idgu.edu.ua/rozklad");
             tabControl1.SelectedIndex = 5;
             button4.Visible = false;
+            
         }
 
         private void checkBox1_CheckedChanged(object sender, EventArgs e)
